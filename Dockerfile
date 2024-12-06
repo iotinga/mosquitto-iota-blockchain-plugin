@@ -22,15 +22,15 @@ RUN apt update && apt install -y \
 RUN python3.12 -m pip install iota-sdk==1.1.4 --break-system-packages
 
 # Build the mosquitto-iota-blockchain-plugin from source
-RUN wget https://github.com/iotinga/mosquitto-iota-blockchain-plugin/archive/refs/tags/v${MESSAGE_SIGN_PLUGIN_VERSION}.tar.gz -O mosquitto-iota-blockchain-plugin-${MESSAGE_SIGN_PLUGIN_VERSION}.tar.gz
-RUN tar xzvf mosquitto-iota-blockchain-plugin-${MESSAGE_SIGN_PLUGIN_VERSION}.tar.gz
-RUN cd mosquitto-iota-blockchain-plugin-${MESSAGE_SIGN_PLUGIN_VERSION} \
+RUN wget https://github.com/iotinga/mosquitto-iota-blockchain-plugin/archive/refs/tags/v${IOTA_BLOCKCHAIN_PLUGIN_VERSION}.tar.gz -O mosquitto-iota-blockchain-plugin-${IOTA_BLOCKCHAIN_PLUGIN_VERSION}.tar.gz
+RUN tar xzvf mosquitto-iota-blockchain-plugin-${IOTA_BLOCKCHAIN_PLUGIN_VERSION}.tar.gz
+RUN cd mosquitto-iota-blockchain-plugin-${IOTA_BLOCKCHAIN_PLUGIN_VERSION} \
     && mkdir build && cd build \
     && cmake .. \
     && make \
     && make install \
     && cd ../.. \
-    && rm -rf mosquitto-iota-blockchain-plugin-${MESSAGE_SIGN_PLUGIN_VERSION} mosquitto-iota-blockchain-plugin-${MESSAGE_SIGN_PLUGIN_VERSION}.tar.gz
+    && rm -rf mosquitto-iota-blockchain-plugin-${IOTA_BLOCKCHAIN_PLUGIN_VERSION} mosquitto-iota-blockchain-plugin-${IOTA_BLOCKCHAIN_PLUGIN_VERSION}.tar.gz
 
 
 # Create mosquitto directories
