@@ -49,6 +49,8 @@ static void load_configuration(plugin_config *config,
 
 static int callback_message(int event, void *event_data, void *userdata) {
   UNUSED(event);
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
 
   plugin_config *config = (plugin_config *)userdata;
   struct mosquitto_evt_message *ed = (struct mosquitto_evt_message *)event_data;
@@ -65,6 +67,26 @@ static int callback_message(int event, void *event_data, void *userdata) {
   if (!cbor_isa_map(cbor_map)) {
     mosquitto_log_printf(MOSQ_LOG_ERR, "CBOR item is not a map");
     cbor_decref(&cbor_map);
+    return -1;
+  }
+
+  if (!cbor_map_is_indefinite(cbor_map)) {
+    mosquitto_log_printf(MOSQ_LOG_ERR, "CBOR map is not indefinite");
+    cbor_decref(&cbor_map);
+    return -1;
+  }
+
+  cbor_item_t *ingestion_time_key = cbor_build_string("INGESTION_TIME");
+  cbor_item_t *ingestion_time_value =
+      cbor_build_uint64(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+  struct cbor_pair ingestion_time_pair = {.key = ingestion_time_key,
+                                          .value = ingestion_time_value};
+
+  if (!cbor_map_add(cbor_map, ingestion_time_pair)) {
+    mosquitto_log_printf(MOSQ_LOG_ERR, "Failed to add INGESTION TIME");
+    cbor_decref(&cbor_map);
+    cbor_decref(&ingestion_time_key);
+    cbor_decref(&ingestion_time_value);
     return -1;
   }
 
@@ -89,7 +111,7 @@ static int callback_message(int event, void *event_data, void *userdata) {
   }
 
   // Add the signature to the map
-  struct cbor_pair new_pair = {.key = cbor_build_string("SIGN_TOKEN"),
+  struct cbor_pair new_pair = {.key = cbor_build_string("VERIFICATION_TOKEN"),
                                .value = signature_item};
   if (!cbor_map_add(cbor_map, new_pair)) {
     cbor_decref(&signature_item);

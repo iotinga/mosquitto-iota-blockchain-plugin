@@ -43,6 +43,9 @@
 *.idb
 *.pdb
 
+# Editor
+.vscode/
+
 # Build dir
 build*/
 
